@@ -38,26 +38,59 @@ class Result:
               (self.longest_size, self.left_size, self.right_size, self.is_entire_range))
     
     
-# def longest_run_recursive(mylist, key, left_size, right_size):
-# 	middle = (left_size + right_size) // 2
-# 	if len(mylist) == 0: #base case 1
-# 		return Result(0,0,0,False)
-# 	left = mylist[:middle]
-# 	right = mylist[middle:]
-# 	left_size = longest_run_recursive(left, key, left_size, 0)
-# 	right_size = longest_run_recursive(right, key, 0, right_size)
-# 	if left[-1] == right[0]:
-# 		longest_size = left_size + right_size + 1
-# 	else:
-# 		longest_size = max(left_size, right_size)
-# 	if len(mylist) == longest_size:
-# 		is_entire_range = True
-# 	else:
-# 		is_entire_range = False
-# 	return Result(left_size, right_size, longest_size, is_entire_range)
+def longest_run_recursive(mylist, key):
+	def longest_run_recursive_helper(mylist, key, Result):
+		if len(mylist) == 0:
+			return Result(0,0,0,False)
+		mid = len(mylist) // 2
+		left = mylist[:mid]
+		right = mylist[mid:]
+		#print("list: {} \nleft: {} \nright: {}".format(mylist, left, right))
+		if len(mylist) == 2:
+			if left and left[0] == key:
+				Result.left_size += 1
+			#	print("longest size (L) {}\n".format(Result.left_size))
+			if right and right[0] == key:
+				Result.right_size += 1
+			#	print("longest size (R) {}\n".format(Result.right_size))
+			return Result
+		if len(mylist) == 1:
+			if mylist[0] == key:
+				Result.right_size += 1
+			#	print("longest size (1) {}\n".format(Result.right_size))
+			return Result
+		else:
+		#	print("recurring\n")
+			left_size = longest_run_recursive_helper(left,key,Result).left_size
+			right_size = longest_run_recursive_helper(right, key, Result).right_size
+		if left and left[-1] == key and right and right[0] == key:
+		#	print("left size: {} right size: {}".format(Result.left_size, Result.right_size))
+			Result.longest_size = left_size + right_size
+		else:
+			Result.longest_size = max(left_size, right_size)
+		if Result.longest_size == len(mylist):
+			Result.is_entire_range = True
+		else:
+				Result.is_entire_range = False
+		return Result
+	mid = len(mylist) // 2
+	left = mylist[:mid]
+	right = mylist[mid:]
+	left_result = longest_run_recursive_helper(left, key, Result(0,0,0,False))
+	right_result = longest_run_recursive_helper(right, key, Result(0,0,0,False))
+	if left_result.is_entire_range == True and right_result.is_entire_range == True:
+		is_entire_range = True
+	else:
+		is_entire_range = False
+	if left[-1] == right[0]:
+		return Result(left_result.longest_size, right_result.longest_size, left_result.longest_size + right_result.longest_size, is_entire_range)
+	else:
+		return Result(left_result.longest_size, right_result.longest_size, max(left_result.longest_size, right_result.longest_size), is_entire_range)
+	
+	
 		
-# print(longest_run_recursive([2,12,12,8,12,12,12,0,12,1], 12, 0, 0))
-# ## Feel free to add your own tests here.
-# def test_longest_run():
-#     assert longest_run([2,12,12,8,12,12,12,0,12,1], 12) == 3
+print(longest_run_recursive([1,12,12,12,1,12], 12))
+## Feel free to add your own tests here.
+def test_longest_run():
+    assert longest_run_recursive([1,12,12,12,1,12], 12).longest_size == 3
 
